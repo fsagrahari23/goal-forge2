@@ -1,50 +1,23 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
 import { connectToDatabase } from "@/lib/mongodb";
 import Blog from "@/models/Blog";
-import { authOptions } from "../../../../../config/authOptions";
 
-
-// Like a blog (authenticated users only)
-export async function POST({ params }) {
+export async function POST(req, { params }) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { success: false, message: "Not authenticated" },
-        { status: 401 }
-      );
-    }
-
     await connectToDatabase();
-
-    const blog = await Blog.findOne({ slug: params.slug });
+    
+    const { slug } = params; // ✅ Correct way to access dynamic params
+    const blog = await Blog.findOne({ slug });
 
     if (!blog) {
-      return NextResponse.json(
-        { success: false, message: "Blog not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    // Increment likes
-    blog.likes += 1;
+    blog.likes += 1; // Increment likes
     await blog.save();
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Blog liked successfully",
-        likes: blog.likes,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ message: "Like added", likes: blog.likes });
   } catch (error) {
-    console.error("Blog like error:", error);
-    return NextResponse.json(
-      { success: false, message: "Error liking blog" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
