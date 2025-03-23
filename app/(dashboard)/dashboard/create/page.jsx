@@ -28,7 +28,15 @@ export default function CreateRoadmapPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
+  
+    // Create an AbortController instance
+    const controller = new AbortController();
+  
+    // Set a custom timeout (30 seconds here)
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 30000);
+  
     try {
       const res = await fetch("/api/roadmaps", {
         method: "POST",
@@ -40,16 +48,19 @@ export default function CreateRoadmapPage() {
           description,
           prompt,
         }),
+        signal: controller.signal, // Attach the abort signal
       });
-      console.log(res)
-
+  
+      // Clear the timeout once the fetch completes
+      clearTimeout(timeoutId);
+  
       const data = await res.json();
-
+  
       if (!res.ok) {
-        console.log(data)
+        console.log(data);
         throw new Error(data.message || "Failed to create roadmap");
       }
-
+  
       router.push(`/dashboard/roadmaps/${data.roadmap._id}`);
     } catch (err) {
       setError("Failed to create roadmap. Please try again.");
