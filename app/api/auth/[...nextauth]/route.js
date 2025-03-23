@@ -14,9 +14,7 @@ export const authOptions = {
       async authorize(credentials) {
         await connectToDatabase();
 
-        const user = await User.findOne({ email: credentials.email }).select(
-          "+password"
-        );
+        const user = await User.findOne({ email: credentials.email }).select("+password");
 
         if (!user) {
           throw new Error("No user found with this email");
@@ -64,6 +62,5 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-const handler = NextAuth(authOptions);
-
+// ✅ Correct Export for App Router (Next.js 13+)
 export const { GET, POST } = NextAuth(authOptions);
