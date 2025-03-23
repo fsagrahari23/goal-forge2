@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { connectToDatabase } from "@/lib/mongodb";
 import Blog from "@/models/Blog";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "../../../../config/authOptions";
+
 
 // Get a single blog by slug (public)
 export async function GET( { params }) {

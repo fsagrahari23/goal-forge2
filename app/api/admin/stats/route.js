@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth/next";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 import Roadmap from "@/models/Roadmap";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "../../../../config/authOptions";
+
 
 export async function GET() {
   try {

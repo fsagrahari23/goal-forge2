@@ -3,11 +3,13 @@ import { getServerSession } from "next-auth/next";
 import { connectToDatabase } from "@/lib/mongodb";
 import Roadmap from "@/models/Roadmap";
 import User from "@/models/User";
-import { authOptions } from "../../auth/[...nextauth]/route";
+import { authOptions } from "../../../../config/authOptions";
+
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions
+    );
 
     if (!session || !session.user.isAdmin) {
       return NextResponse.json(

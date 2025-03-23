@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { connectToDatabase } from "@/lib/mongodb";
 import Blog from "@/models/Blog";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { authOptions } from "../../../config/authOptions";
+
 
 // Get all blogs (public)
 export async function GET(request) {

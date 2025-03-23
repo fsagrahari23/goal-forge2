@@ -3,8 +3,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { connectToDatabase } from "@/lib/mongodb";
 import Roadmap from "@/models/Roadmap";
-import { authOptions } from "../auth/[...nextauth]/route";
+
 import { getTasksPhasesWithDailyTasksShedule } from "../../../lib/generative-ai";
+import { authOptions } from "../../../config/authOptions";
 
 export async function POST(request) {
   try {
