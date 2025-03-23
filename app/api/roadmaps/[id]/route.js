@@ -5,7 +5,7 @@ import Roadmap from "@/models/Roadmap";
 import { authOptions } from "../../../../config/authOptions";
 
 
-export async function GET( { params }) {
+export async function GET( req,{ params }) {
   try {
     const session = await getServerSession(authOptions);
 

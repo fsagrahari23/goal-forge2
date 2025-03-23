@@ -6,7 +6,7 @@ import { authOptions } from "../../../../config/authOptions";
 
 
 // Get a single blog by slug (public)
-export async function GET( { params }) {
+export async function GET(req, { params }) {
   try {
     await connectToDatabase();
 
