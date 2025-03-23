@@ -26,10 +26,10 @@ export async function POST(request) {
     const timeout = (ms) => 
       new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), ms));
 
-    // Fetch roadmap data with a timeout (e.g., 15 seconds)
+    // Fetch roadmap data with a timeout (e.g., 25 seconds)
     const tasksPhasesWithDailyTasksSchedule = await Promise.race([
       getTasksPhasesWithDailyTasksShedule(prompt),
-      timeout(25000) // 15 seconds timeout
+      timeout(25000) // 25 seconds timeout
     ]);
 
     if (!tasksPhasesWithDailyTasksSchedule || tasksPhasesWithDailyTasksSchedule.status !== "success") {
@@ -77,6 +77,9 @@ export async function POST(request) {
     // Save the roadmap document
     const roadmap = await Roadmap.create(roadmapData);
 
+    // Wait for 30 seconds before responding
+    await new Promise(resolve => setTimeout(resolve, 30000));
+
     return NextResponse.json(
       {
         success: true,
@@ -97,6 +100,7 @@ export async function POST(request) {
     );
   }
 }
+
 
 
 export async function GET(req) {
