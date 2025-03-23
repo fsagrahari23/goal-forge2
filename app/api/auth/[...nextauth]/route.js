@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { connectToDatabase } from "@/lib/mongodb";
 import User from "@/models/User";
 
-export const authOptions = {
+ const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -62,5 +62,5 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// ✅ Correct Export for App Router (Next.js 13+)
-export const { GET, POST } = NextAuth(authOptions);
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
