@@ -5,7 +5,7 @@ import Blog from "@/models/Blog";
 import { authOptions } from "../../../auth/[...nextauth]/route";
 
 // Like a blog (authenticated users only)
-export async function POST(request, { params }) {
+export async function POST({ params }) {
   try {
     const session = await getServerSession(authOptions);
 

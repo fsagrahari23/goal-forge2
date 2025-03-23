@@ -5,7 +5,7 @@ import Blog from "@/models/Blog";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
 // Get a single blog by slug (public)
-export async function GET(request, { params }) {
+export async function GET( { params }) {
   try {
     await connectToDatabase();
 

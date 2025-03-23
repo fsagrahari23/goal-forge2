@@ -4,7 +4,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import Roadmap from "@/models/Roadmap";
 import { authOptions } from "../../auth/[...nextauth]/route";
 
-export async function GET(request, { params }) {
+export async function GET( { params }) {
   try {
     const session = await getServerSession(authOptions);
 
