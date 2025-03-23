@@ -43,14 +43,14 @@ export async function POST(request) {
 
     // Transform phases and tasks into correct schema format
     const formattedPhases = tasksPhasesWithDailyTasksSchedule.Phases.map(
-      (phase, phaseIndex) => ({
+      (phase) => ({
         phase: phase.Phase,
         objective: phase.objective || "",
         durationInDays: phase["Duration (Days)"],
         startDate: new Date(phase["Start Date"]),
         endDate: new Date(phase["End Date"]),
         task: phase.Task || "",
-        tasks: phase.tasks.map((task, taskIndex) => ({
+        tasks: phase.tasks.map((task) => ({
           dayNo: task["Day No"], // Auto-increment day number
           dateOfDayNo: new Date(task["Date of Day No"]), // Ensure Date format
           task_description: task.task_description || "",
