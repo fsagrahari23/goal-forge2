@@ -45,6 +45,7 @@ export default function CreateRoadmapPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        console.log(data)
         throw new Error(data.message || "Failed to create roadmap");
       }
 
