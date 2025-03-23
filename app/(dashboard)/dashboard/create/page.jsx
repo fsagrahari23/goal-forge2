@@ -41,6 +41,7 @@ export default function CreateRoadmapPage() {
           prompt,
         }),
       });
+      console.log(res)
 
       const data = await res.json();
 
