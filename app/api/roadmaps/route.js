@@ -20,6 +20,7 @@ export async function POST(request) {
 
     // Parse the request body
     const { title, description, prompt } = await request.json();
+    console.log(title ,description, prompt )
     const tasksPhasesWithDailyTasksSchedule =
       await getTasksPhasesWithDailyTasksShedule(prompt);
 
@@ -33,7 +34,7 @@ export async function POST(request) {
       );
     }
 
-    console.log(tasksPhasesWithDailyTasksSchedule);
+    // console.log(tasksPhasesWithDailyTasksSchedule);
 
     // Connect to MongoDB
     await connectToDatabase();
