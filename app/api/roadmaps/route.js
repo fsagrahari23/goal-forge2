@@ -20,21 +20,24 @@ export async function POST(request) {
 
     // Parse the request body
     const { title, description, prompt } = await request.json();
-    console.log(title ,description, prompt )
-    const tasksPhasesWithDailyTasksSchedule =
-      await getTasksPhasesWithDailyTasksShedule(prompt);
+    console.log(title, description, prompt);
 
-    if (
-      !tasksPhasesWithDailyTasksSchedule ||
-      tasksPhasesWithDailyTasksSchedule.status !== "success"
-    ) {
+    // Function to enforce a timeout
+    const timeout = (ms) => 
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), ms));
+
+    // Fetch roadmap data with a timeout (e.g., 15 seconds)
+    const tasksPhasesWithDailyTasksSchedule = await Promise.race([
+      getTasksPhasesWithDailyTasksShedule(prompt),
+      timeout(25000) // 15 seconds timeout
+    ]);
+
+    if (!tasksPhasesWithDailyTasksSchedule || tasksPhasesWithDailyTasksSchedule.status !== "success") {
       return NextResponse.json(
-        { success: false, message: "Error generating roadmap" },
+        { success: false, message: "Error generating roadmap or timeout occurred" },
         { status: 500 }
       );
     }
-
-    // console.log(tasksPhasesWithDailyTasksSchedule);
 
     // Connect to MongoDB
     await connectToDatabase();
@@ -44,24 +47,22 @@ export async function POST(request) {
     const numberOfDays = tasksPhasesWithDailyTasksSchedule["Number of Days"];
 
     // Transform phases and tasks into correct schema format
-    const formattedPhases = tasksPhasesWithDailyTasksSchedule.Phases.map(
-      (phase) => ({
-        phase: phase.Phase,
-        objective: phase.objective || "",
-        durationInDays: phase["Duration (Days)"],
-        startDate: new Date(phase["Start Date"]),
-        endDate: new Date(phase["End Date"]),
-        task: phase.Task || "",
-        tasks: phase.tasks.map((task) => ({
-          dayNo: task["Day No"], // Auto-increment day number
-          dateOfDayNo: new Date(task["Date of Day No"]), // Ensure Date format
-          task_description: task.task_description || "",
-          is_review_assignment: task.is_review_assignment || false,
-          estimated_hours: task.estimated_hours || 0,
-          resources_needed: task.resources_needed || [],
-        })),
-      })
-    );
+    const formattedPhases = tasksPhasesWithDailyTasksSchedule.Phases.map((phase) => ({
+      phase: phase.Phase,
+      objective: phase.objective || "",
+      durationInDays: phase["Duration (Days)"],
+      startDate: new Date(phase["Start Date"]),
+      endDate: new Date(phase["End Date"]),
+      task: phase.Task || "",
+      tasks: phase.tasks.map((task) => ({
+        dayNo: task["Day No"],
+        dateOfDayNo: new Date(task["Date of Day No"]),
+        task_description: task.task_description || "",
+        is_review_assignment: task.is_review_assignment || false,
+        estimated_hours: task.estimated_hours || 0,
+        resources_needed: task.resources_needed || [],
+      })),
+    }));
 
     // Assemble the full roadmap data
     const roadmapData = {
@@ -95,6 +96,7 @@ export async function POST(request) {
       { status: 500 }
     );
   }
+}
 }
 
 export async function GET(req) {
