@@ -24,7 +24,7 @@ export default function CreateRoadmapPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => { 
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
@@ -42,9 +42,6 @@ export default function CreateRoadmapPage() {
         }),
       });
 
-      // Wait for 30 seconds before proceeding
-      await new Promise(resolve => setTimeout(resolve, 30000));
-
       const data = await res.json();
 
       if (!res.ok) {
@@ -58,7 +55,7 @@ export default function CreateRoadmapPage() {
     } finally {
       setLoading(false);
     }
-};
+  };
 
   return (
     <div className="space-y-6">
