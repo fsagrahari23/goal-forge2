@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,14 +11,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ChevronLeft, Loader2 } from "lucide-react";
 import { PhaseView } from "@/components/phase-view";
 import { DailyView } from "@/components/daily-view";
 
-export default function RoadmapDetailPage({ params }) {
+export default function RoadmapDetailPage({
+  params: paramsPromise,
+}) {
   const router = useRouter();
+  const params = React.use(paramsPromise); // Unwrap the params Promise
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,7 +38,9 @@ export default function RoadmapDetailPage({ params }) {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.message || "Failed to fetch roadmap");
+          throw new Error(
+            data.message || "Failed to fetch roadmap"
+          );
         }
 
         setRoadmap(data.roadmap);
@@ -74,13 +85,16 @@ export default function RoadmapDetailPage({ params }) {
             <CardHeader>
               <CardTitle>Project Overview</CardTitle>
               <CardDescription>
-                {new Date(roadmap["Start Date"]).toLocaleDateString()} •{" "}
-                {roadmap["Number of Days"]} days
+                {new Date(
+                  roadmap["Start Date"]
+                ).toLocaleDateString()}{" "}
+                • {roadmap["Number of Days"]} days
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                {roadmap.description || "No description provided"}
+                {roadmap.description ||
+                  "No description provided"}
               </p>
             </CardContent>
           </Card>
