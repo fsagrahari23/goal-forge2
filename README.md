@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Goal Forge
 
-## Getting Started
+An AI-powered productivity platform that helps users set goals, break them into manageable tasks, and track progress effectively.
 
-First, run the development server:
+## Objectives
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. Provide Users with a roadmap
+2. Ability to track progress of individual resolutions
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Implementation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Using Google Gemini API for the ML part
+2. Using React for the Frontend
+3. MongoDB for Backend
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Timeline
 
-## Learn More
+February - Design and Basic Frontend \
+March - Backend
 
-To learn more about Next.js, take a look at the following resources:
+## Work Division
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Ritovan, Rithvik, Kshitij, Monu Agrahari - Web part \
+Lokesh - ML
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Status
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Basic Website is completed
+- Github link - https://github.com/fsagrahari23/goal-forge2
+- Live Link - https://goal-forge2.vercel.app/
