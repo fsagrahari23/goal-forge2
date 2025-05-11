@@ -1,21 +1,29 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
-const AuthContext = createContext(undefined);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const router = useRouter();
   const { data: session, status } = useSession();
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status !== "loading") {
-      setLoading(false);
+    if (status === "authenticated") {
+      setUser({
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        isAdmin: session.user.isAdmin,
+        accessToken: session.accessToken, // Google access token if available
+      });
+    } else {
+      setUser(null);
     }
-  }, [status]);
+    setLoading(status === "loading");
+  }, [session, status]);
 
   const login = async (email, password) => {
     try {
@@ -24,18 +32,23 @@ export function AuthProvider({ children }) {
         email,
         password,
       });
-
-      if (result?.error) {
-        return { success: false, message: result.error };
+      if (!result.ok) {
+        return { success: false, message: result.error || "Login failed" };
       }
-
-      router.push("/dashboard");
       return { success: true };
     } catch (error) {
-      return { success: false, message: "An error occurred during login" };
+      return { success: false, message: "An unexpected error occurred" };
     }
   };
 
+  const loginWithGoogle = async () => {
+    try {
+      await signIn("google", { redirect: false });
+      return { success: true };
+    } catch (error) {
+      return { success: false, message: "Google login failed", error: error };
+    }
+  };
   const register = async (name, email, password) => {
     try {
       const res = await fetch("/api/register", {
@@ -65,18 +78,12 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     await signOut({ redirect: false });
-    router.push("/");
+    setUser(null);
   };
 
   return (
     <AuthContext.Provider
-      value={{
-        user: session?.user,
-        loading,
-        login,
-        register,
-        logout,
-      }}
+      value={{ user, login, loginWithGoogle, logout, loading, register }}
     >
       {children}
     </AuthContext.Provider>
@@ -84,9 +91,5 @@ export function AuthProvider({ children }) {
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  return useContext(AuthContext);
 }

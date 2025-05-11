@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,14 +9,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { loginWithGoogle } = useAuth();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [Gloading, setGloading] = useState(false);
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/dashboard");
+    }
+  }, [status, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +38,7 @@ export default function LoginPage() {
 
       if (!result.success) {
         setError(result.message || "Failed to login");
+        alert("users not registered yet or login error");
         return;
       }
 
@@ -35,6 +46,23 @@ export default function LoginPage() {
     } catch (err) {
       setError("An unexpected error occurred");
     } finally {
+      setLoading(false);
+    }
+  };
+  console.log(error);
+  const handleLoginWithGoogle = async () => {
+    try {
+      const result = await loginWithGoogle();
+
+      if (!result.success) {
+        setError(result.message || "Google login failed");
+        console.error(result.error);
+        setLoading(false);
+        return;
+      }
+      // No need for manual redirect here; useEffect will handle it
+    } catch (err) {
+      setError("An unexpected error occurred");
       setLoading(false);
     }
   };
@@ -50,7 +78,8 @@ export default function LoginPage() {
           <div className="space-y-2 text-center">
             <h1 className="text-3xl font-bold">Login</h1>
             <p className="text-gray-500 dark:text-gray-400">
-              Enter your credentials to access your account
+              Enter your credentials to access your account , login with Google
+              for getting notification on google calendar
             </p>
           </div>
           {error && (
@@ -94,6 +123,21 @@ export default function LoginPage() {
                 </>
               ) : (
                 "Login"
+              )}
+            </Button>
+            <Button
+              type="button"
+              className="w-full"
+              onClick={handleLoginWithGoogle}
+              disabled={Gloading}
+            >
+              {Gloading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Logging in with Google...
+                </>
+              ) : (
+                "Login with Google"
               )}
             </Button>
           </form>

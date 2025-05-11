@@ -1,9 +1,9 @@
-// pages/api/roadmap.js
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { connectToDatabase } from "@/lib/mongodb";
 import Roadmap from "@/models/Roadmap";
-
+import User from "@/models/User";
+import { google } from "googleapis";
 import { getTasksPhasesWithDailyTasksShedule } from "../../../lib/generative-ai";
 import { authOptions } from "../../../config/authOptions";
 
@@ -20,15 +20,10 @@ export async function POST(request) {
 
     // Parse the request body
     const { title, description, prompt } = await request.json();
-    console.log(title, description, prompt);
 
-    // Function to enforce a timeout
-
-    // Fetch roadmap data with a timeout (e.g., 25 seconds)
-    const tasksPhasesWithDailyTasksSchedule = await Promise.race([
-      getTasksPhasesWithDailyTasksShedule(prompt),
-      timeout(25000), // 25 seconds timeout
-    ]);
+    // Generate roadmap tasks and phases
+    const tasksPhasesWithDailyTasksSchedule =
+      await getTasksPhasesWithDailyTasksShedule(prompt);
 
     if (
       !tasksPhasesWithDailyTasksSchedule ||
@@ -80,16 +75,81 @@ export async function POST(request) {
       phases: formattedPhases,
     };
 
-    // Save the roadmap document
+    // Save roadmap to MongoDB
     const roadmap = await Roadmap.create(roadmapData);
 
-    // Wait for 30 seconds before responding
-    await new Promise((resolve) => setTimeout(resolve, 30000));
+    // Fetch user's Google tokens
+    const user = await User.findById(session.user.id);
+    if (!user.googleTokens || !user.googleTokens.accessToken) {
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Roadmap created, but Google Calendar not linked",
+          roadmap,
+        },
+        { status: 201 }
+      );
+    }
+
+    // Set up Google Calendar API
+    const auth = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_REDIRECT_URI
+    );
+    auth.setCredentials({
+      access_token: user.googleTokens.accessToken,
+      refresh_token: user.googleTokens.refreshToken,
+    });
+
+    // Refresh token if expired
+    if (Date.now() > user.googleTokens.expiryDate) {
+      const { credentials } = await auth.refreshAccessToken();
+      await User.findByIdAndUpdate(user._id, {
+        googleTokens: {
+          accessToken: credentials.access_token,
+          refreshToken:
+            credentials.refresh_token || user.googleTokens.refreshToken,
+          expiryDate: credentials.expiry_date,
+        },
+      });
+      auth.setCredentials({
+        access_token: credentials.access_token,
+        refresh_token: credentials.refresh_token,
+      });
+    }
+
+    const calendar = google.calendar({ version: "v3", auth });
+
+    // Create Google Calendar events for each task
+    for (const phase of formattedPhases) {
+      for (const task of phase.tasks) {
+        const event = {
+          summary: `${title} - ${phase.phase}: ${task.task_description}`,
+          description: `Part of roadmap: ${description}`,
+          start: {
+            dateTime: task.dateOfDayNo.toISOString(),
+            timeZone: "Asia/Kolkata", // Adjust as needed
+          },
+          end: {
+            dateTime: new Date(
+              task.dateOfDayNo.getTime() + task.estimated_hours * 60 * 60 * 1000
+            ).toISOString(),
+            timeZone: "Asia/Kolkata",
+          },
+        };
+
+        await calendar.events.insert({
+          calendarId: "primary",
+          resource: event,
+        });
+      }
+    }
 
     return NextResponse.json(
       {
         success: true,
-        message: "Roadmap created successfully",
+        message: "Roadmap created and synced with Google Calendar",
         roadmap,
       },
       { status: 201 }
@@ -99,7 +159,7 @@ export async function POST(request) {
     return NextResponse.json(
       {
         success: false,
-        message: "Error creating roadmap",
+        message: "Error creating roadmap or syncing with Google Calendar",
         error: error.message,
       },
       { status: 500 }
