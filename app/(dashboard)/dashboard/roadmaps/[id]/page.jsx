@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation"; // Import useParams
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,8 +16,9 @@ import { ChevronLeft, Loader2 } from "lucide-react";
 import { PhaseView } from "@/components/phase-view";
 import { DailyView } from "@/components/daily-view";
 
-export default function RoadmapDetailPage({ params }) {
+export default function RoadmapDetailPage() {
   const router = useRouter();
+  const params = useParams(); // Unwrap params using useParams
   const [roadmap, setRoadmap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,7 +26,7 @@ export default function RoadmapDetailPage({ params }) {
   useEffect(() => {
     const fetchRoadmap = async () => {
       try {
-        const res = await fetch(`/api/roadmaps/${params.id}`);
+        const res = await fetch(`/api/roadmaps/${params.id}`); // Access params.id after unwrapping
         const data = await res.json();
 
         if (!res.ok) {
@@ -42,7 +43,7 @@ export default function RoadmapDetailPage({ params }) {
     };
 
     fetchRoadmap();
-  }, [params.id]);
+  }, [params.id]); // Access params.id after unwrapping
 
   return (
     <div className="space-y-6">
